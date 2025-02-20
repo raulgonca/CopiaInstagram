@@ -4,9 +4,10 @@
 
 {% block body %}
     <header>
-        {% if is_granted 'ROLE_USER' %}
+        {% if is_granted('ROLE_USER') %}
             <a href="{{ path('app_logout') }}">Logout</a>
             <a href="{{ path('app_post_new') }}">New Post</a>
+            <a href="{{ path('app_user_show', {'id': app.user.id}) }}">My profile</a>
         {% endif %}
     </header>
 {% endblock %}

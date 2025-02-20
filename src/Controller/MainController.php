@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class MainController extends AbstractController
 {
-    #[Route('/a', name: 'app_main')]
+    #[Route('/', name: 'app_main')]
     public function index(): Response
     {
         if (!$this->isGranted("ROLE_USER")){
