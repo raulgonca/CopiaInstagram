@@ -22,24 +22,39 @@ final class CommentController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_comment_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_comment_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $comment = new Comment();
-        $form = $this->createForm(CommentType::class, $comment);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($comment);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_comment_index', [], Response::HTTP_SEE_OTHER);
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'You must be logged in to comment');
+            return $this->redirectToRoute('app_login');
         }
 
-        return $this->render('comment/new.html.twig', [
-            'comment' => $comment,
-            'form' => $form,
-        ]);
+        $postId = $request->request->get('post_id');
+        $content = $request->request->get('content');
+
+        if (empty($content)) {
+            $this->addFlash('error', 'Comment cannot be empty');
+            return $this->redirectToRoute('app_post_show', ['id' => $postId]);
+        }
+
+        try {
+            $comment = new Comment();
+            $comment->setOwner($user);
+            $comment->setText($content);
+            $comment->setDate(new \DateTime());
+            $comment->setPost($entityManager->getReference('App\Entity\Post', $postId));
+
+            $entityManager->persist($comment);
+            $entityManager->flush();
+            
+            $this->addFlash('success', 'Comment added successfully');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Error saving comment');
+        }
+
+        return $this->redirectToRoute('app_post_show', ['id' => $postId]);
     }
 
     #[Route('/{id}', name: 'app_comment_show', methods: ['GET'])]

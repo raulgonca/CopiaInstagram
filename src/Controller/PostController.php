@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Like;
 use App\Entity\Post;
 use App\Form\PostType;
 use App\Repository\PostRepository;
@@ -43,13 +44,24 @@ final class PostController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
-    public function show(Post $post): Response
+    public function show(Post $post, EntityManagerInterface $entityManager): Response
     {
+        $likeCount = $entityManager->getRepository(Like::class)->count(['post' => $post]);
+        $userLike = null;
+        
+        if ($this->getUser()) {
+            $userLike = $entityManager->getRepository(Like::class)->findOneBy([
+                'post' => $post,
+                'owner' => $this->getUser()
+            ]);
+        }
+
         return $this->render('post/show.html.twig', [
             'post' => $post,
+            'likeCount' => $likeCount,
+            'hasLiked' => $userLike !== null
         ]);
     }
-
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
@@ -77,5 +89,34 @@ final class PostController extends AbstractController
         }
 
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+    }
+    #[Route('/{id}/like', name: 'app_post_like', methods: ['POST'])]
+    public function like(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Debes iniciar sesión para dar like');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $likeRepository = $entityManager->getRepository(Like::class);
+        $existingLike = $likeRepository->findOneBy([
+            'post' => $post,
+            'owner' => $user
+        ]);
+
+        if ($existingLike) {
+            $entityManager->remove($existingLike);
+            $this->addFlash('success', 'Has quitado tu like');
+        } else {
+            $like = new Like();
+            $like->setPost($post);
+            $like->setOwner($user);
+            $entityManager->persist($like);
+            $this->addFlash('success', 'Like añadido!');
+        }
+
+        $entityManager->flush();
+        return $this->redirectToRoute('app_post_show', ['id' => $post->getId()]);
     }
 }
