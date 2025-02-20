@@ -75,14 +75,14 @@ final class PostController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show_post')]
     public function show(Post $post): Response
     {
         return $this->render('post/show.html.twig', [
-            'post' => $post,
+            'post' => $post
         ]);
     }
-    
-
+  
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
