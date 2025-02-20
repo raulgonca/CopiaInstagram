@@ -38,11 +38,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
 
-    /**
-     * @var Collection<int, Post>
-     */
-    #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'owner')]
-    private Collection $Post;
+
+
+    #[ORM\Column(type: Types::ARRAY, nullable: true)]
+    private ?array $follows = null;
+
 
     /**
      * @var Collection<int, Post>
@@ -64,7 +64,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->Post = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->likes = new ArrayCollection();
         $this->comments = new ArrayCollection();
