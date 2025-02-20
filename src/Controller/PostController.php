@@ -25,7 +25,18 @@ final class PostController extends AbstractController
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Check if user is logged in
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
         $post = new Post();
+        $post->setDate(new \DateTime());
+        $post->setOwner($user);
+        $post->setBanned(false);
+        $post->setReport(false);
+
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
@@ -33,7 +44,7 @@ final class PostController extends AbstractController
             $entityManager->persist($post);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main');
         }
 
         return $this->render('post/new.html.twig', [
@@ -49,6 +60,7 @@ final class PostController extends AbstractController
             'post' => $post,
         ]);
     }
+    
 
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
