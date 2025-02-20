@@ -42,6 +42,28 @@ final class UserController extends AbstractController
         ]);
     }
 
+    // Funcion para administrar usuarios (banear)
+    #[Route('/{id}/toggle-ban', name: 'app_user_toggle_ban', methods: ['POST'])]
+    public function toggleBan(User $user, EntityManagerInterface $entityManager): Response
+    {
+        // Toggle the banned status
+        $user->setBanned(!$user->isBanned());
+        $entityManager->flush();
+
+        $this->addFlash(
+            'success',
+            sprintf(
+                'User %s has been %s',
+                $user->getUsername(),
+                $user->isBanned() ? 'banned' : 'unbanned'
+            )
+        );
+
+        return $this->redirectToRoute('app_admin');
+    }
+
+
+
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
@@ -71,7 +93,7 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
         }

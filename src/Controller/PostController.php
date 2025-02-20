@@ -42,6 +42,30 @@ final class PostController extends AbstractController
         ]);
     }
 
+
+    // Funciones para aprobar o banear posts
+    #[Route('/{id}/approve', name: 'app_post_approve', methods: ['POST'])]
+    public function approvePost(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $post->setReport(false);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Post has been approved');
+        return $this->redirectToRoute('app_admin');
+    }
+
+    #[Route('/{id}/ban', name: 'app_post_ban', methods: ['POST'])]
+    public function banPost(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $post->setBanned(true);
+        $post->setReport(false);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Post has been banned');
+        return $this->redirectToRoute('app_admin');
+    }
+
+
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Post $post): Response
     {
@@ -71,7 +95,7 @@ final class PostController extends AbstractController
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$post->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $post->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($post);
             $entityManager->flush();
         }
