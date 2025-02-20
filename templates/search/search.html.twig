@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <form action="{{ path('app_search') }}" method="GET">
+            <div class="input-group mb-4">
+                <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+
+        {% if query %}
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Users</h3>
+                    <div class="list-group mb-4">
+                        {% if results.users|length > 0 %}
+                            {% for user in results.users %}
+                                <a href="{{ path('app_user_show', {'id': user.id}) }}" class="list-group-item list-group-item-action">
+                                    {{ user.username }}
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="list-group-item">No users found</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h3>Posts</h3>
+                    <div class="list-group">
+                        {% if results.posts|length > 0 %}
+                            {% for post in results.posts %}
+                                <a href="{{ path('show_post', {'id': post.id}) }}" class="list-group-item list-group-item-action">
+                                    <p class="mb-1">{{ post.description }}</p>
+                                    <small class="text-muted">By {{ post.owner.username }}</small>
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="list-group-item">No posts found</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
