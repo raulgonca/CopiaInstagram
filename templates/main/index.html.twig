@@ -6,7 +6,7 @@
     <header>
         {% if is_granted 'ROLE_USER' %}
             <a href="{{ path('app_logout') }}">Logout</a>
-            <a href="{{ path('') }}">New Post</a>
+            <a href="{{ path('app_post_new') }}">New Post</a>
         {% endif %}
     </header>
 {% endblock %}
