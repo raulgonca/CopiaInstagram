@@ -8,10 +8,6 @@
     <table class="table">
         <tbody>
             <tr>
-                <th>Id</th>
-                <td>{{ post.id }}</td>
-            </tr>
-            <tr>
                 <th>Date</th>
                 <td>{{ post.date ? post.date|date('Y-m-d H:i:s') : '' }}</td>
             </tr>
@@ -23,20 +19,61 @@
                 <th>Image</th>
                 <td>{{ post.image }}</td>
             </tr>
+           
             <tr>
-                <th>Banned</th>
-                <td>{{ post.banned ? 'Yes' : 'No' }}</td>
-            </tr>
-            <tr>
-                <th>Report</th>
-                <td>{{ post.report ? 'Yes' : 'No' }}</td>
+                <th>Likes</th>
+                <td>
+                    <span id="likeCount">{{ likeCount }}</span>
+                    {% if app.user %}
+                        <form action="{{ path('app_post_like', {'id': post.id}) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-{{ hasLiked ? 'danger' : 'primary' }}">
+                                {{ hasLiked ? 'Unlike' : 'Like' }}
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
             </tr>
         </tbody>
     </table>
+    
+    {# Add Comment Section #}
+    <div class="comments-section mt-4">
+        <h2>Comments</h2>
+        
+        {# Comment Form #}
+        <form action="{{ path('app_comment_new') }}" method="POST">
+    <textarea name="content" required></textarea>
+    <input type="hidden" name="post_id" value="{{ post.id }}">
+    <button type="submit">Add Comment</button>
+</form>
 
-    <a href="{{ path('app_post_index') }}">back to list</a>
+        {# Display Comments #}
+        <div class="comments-list">
+            {% if post.comments is defined and post.comments|length > 0 %}
+                {% for comment in post.comments %}
+                    <div class="comment-item border-bottom py-2">
+                        <strong>{{ comment.owner.username }}</strong>
+                        <p>{{ comment.text }}</p>
+                        <small class="text-muted">{{ comment.date|date('Y-m-d H:i:s') }}</small>
+                        
+                        {% if app.user == comment.owner %}
+                            <a href="{{ path('app_comment_delete', {'id': comment.id}) }}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Are you sure you want to delete this comment?')">
+                                Delete
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No comments yet. Be the first to comment!</p>
+            {% endif %}
+        </div>
+    </div>
 
-    <a href="{{ path('app_post_edit', {'id': post.id}) }}">edit</a>
-
-    {{ include('post/_delete_form.html.twig') }}
+    <div class="mt-3">
+        <a href="{{ path('app_post_index') }}" class="btn btn-secondary">back to list</a>
+        <a href="{{ path('app_post_edit', {'id': post.id}) }}" class="btn btn-primary">edit</a>
+        {{ include('post/_delete_form.html.twig') }}
+    </div>
 {% endblock %}
