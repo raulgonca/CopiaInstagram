@@ -64,6 +64,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'owner')]
     private Collection $comments;
 
+    #[ORM\Column]
+    private ?bool $banned = null;
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
@@ -244,6 +247,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $comment->setOwner(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isBanned(): ?bool
+    {
+        return $this->banned;
+    }
+
+    public function setBanned(bool $banned): static
+    {
+        $this->banned = $banned;
 
         return $this;
     }
