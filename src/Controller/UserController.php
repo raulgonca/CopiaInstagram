@@ -15,10 +15,10 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UserController extends AbstractController
 {
     #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    public function index(int $id, UserRepository $userRepository): Response
     {
         return $this->render('user/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'user' => $userRepository->findById($id),
         ]);
     }
 
@@ -42,10 +42,32 @@ final class UserController extends AbstractController
         ]);
     }
 
+    // Funcion para administrar usuarios (banear)
+    #[Route('/{id}/toggle-ban', name: 'app_user_toggle_ban', methods: ['POST'])]
+    public function toggleBan(User $user, EntityManagerInterface $entityManager): Response
+    {
+        // Toggle the banned status
+        $user->setBanned(!$user->isBanned());
+        $entityManager->flush();
+
+        $this->addFlash(
+            'success',
+            sprintf(
+                'User %s has been %s',
+                $user->getUsername(),
+                $user->isBanned() ? 'banned' : 'unbanned'
+            )
+        );
+
+        return $this->redirectToRoute('app_admin');
+    }
+
+
+
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
-        return $this->render('user/show.html.twig', [
+        return $this->render('user/index.html.twig', [
             'user' => $user,
         ]);
     }
@@ -71,11 +93,43 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/{id}/unfollow', name: 'app_user_unfollow', methods: ['GET'])]
+    public function unfollowUser(int $id, UserRepository $userRepository, EntityManager $entityManager): Response
+    {
+        $user = $userRepository->findById($this->getUser());
+        if ($user->getFollows()->contains($id)) {
+            $user->getFollows()->removeElement($id);
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+
+        return $this->render('user/index.html.twig', [
+            'user' => $userRepository->findById($id),
+        ]);
+    }
+
+    #[Route('/{id}/follow', name: 'app_user_follow', methods: ['GET'])]
+    public function followUser(int $id, UserRepository $userRepository, EntityManager $entityManager): Response
+    {
+        $user = $userRepository->findById($this->getUser());
+        if ($user->getFollows()->contains($id)===false) {
+            $user->getFollows()->addElement($id);
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+        return $this->render('user/index.html.twig', [
+            'user' => $userRepository->findById($id),
+        ]);
+    }
+
 }

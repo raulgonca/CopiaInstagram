@@ -37,6 +37,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\Column(type: Types::ARRAY)]
+    private array $follows = [];
 
 
 
@@ -61,6 +63,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'owner')]
     private Collection $comments;
+
+    #[ORM\Column]
+    private ?bool $banned = null;
 
     public function __construct()
     {
@@ -242,6 +247,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $comment->setOwner(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isBanned(): ?bool
+    {
+        return $this->banned;
+    }
+
+    public function setBanned(bool $banned): static
+    {
+        $this->banned = $banned;
 
         return $this;
     }

@@ -1,39 +1,53 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}User index{% endblock %}
+{% block title %}
+{% if user is defined %}
+    {{user.username}}
+    {% else %}
+    No existe el usuario
+{% endif %}
+{% endblock %}
 
 {% block body %}
-    <h1>User index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Username</th>
-                <th>Roles</th>
-                <th>Password</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-                <td>{{ user.password }}</td>
-                <td>
-                    <a href="{{ path('app_user_show', {'id': user.id}) }}">show</a>
-                    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+{% if user is defined %}    
+    <h2>{{ user.username }}</h2>
+    <p>Seguidos: {{ user.follows|length }}</p>
+    {% if user==app.user %}
+        <div>
+        <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
+        </div>
+    {% endif %}
+{% else %}
+    <div>
+    <p>No existe el usuario</p>
+    </div>
+{% endif %}
 
-    <a href="{{ path('app_user_new') }}">Create new</a>
+{% for follow in app.user.follows %}
+    {% if follow.id == user.id %}
+        <div>
+        <a href="{{ path('app_user_unfollow', {'id': user.id}) }}">Unfollow</a>
+        </div>
+    {% else %}
+        <div>
+        <a href="{{ path('app_user_follow', {'id': user.id}) }}">Follow</a>
+        </div>
+    {% endif %}
+{% endfor %}
+
+{% if post is defined %}
+    {% for post in posts %}
+        <a href="{{ path('app_post_show', {'id': post.id}) }}">
+        <div>
+            <img src="{{asset('uploads/images/' ~ post.image) }}" alt="Imagen">
+            <p>{{ post.description }}</p>
+        </div>
+        </a>
+    {% endfor %}
+{% else %}
+    <div>
+    <p>No existen posts</p>
+    </div>
+{% endif %}
+
 {% endblock %}
