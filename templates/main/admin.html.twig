@@ -54,7 +54,7 @@
         </div>
     </section>
 
-        <section class="mb-5">
+    <section class="mb-5">
         <h2 class="border-bottom pb-2">Reports Review</h2>
         <div class="content-section p-3 bg-light rounded">
             {% if reportedPosts is empty %}
@@ -94,6 +94,46 @@
             {% endif %}
         </div>
     </section>
+
+<section class="mb-5">
+        <h2 class="border-bottom pb-2">Comments Management</h2>
+        <div class="content-section p-3 bg-light rounded">
+            {% if comments is empty %}
+                <p>No comments found</p>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Post</th>
+                                <th>Comment</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comment in comments %}
+                                <tr>
+                                    <td>{{ comment.owner.username }}</td>
+                                    <td>Post #{{ comment.post.id }}</td>
+                                    <td>{{ comment.text }}</td>
+                                    <td>{{ comment.date|date('Y-m-d H:i') }}</td>
+                                    <td>
+                                        <form action="{{ path('app_comment_delete', {'id': comment.id}) }}" method="POST" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
 
     {# <section class="mb-5">
         <h2 class="border-bottom pb-2">Statistics</h2>

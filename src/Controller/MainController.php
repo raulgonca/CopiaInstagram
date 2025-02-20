@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\CommentRepository;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,14 +20,12 @@ final class MainController extends AbstractController
     }
 
     #[Route('/admin', name: 'app_admin')]
-    public function admin(UserRepository $userRepository, PostRepository $postRepository): Response
+    public function admin(UserRepository $userRepository, PostRepository $postRepository, CommentRepository $commentRepository): Response
     {
-        $users = $userRepository->findAll();
-        $reportedPosts = $postRepository->findBy(['report' => true]);
-
         return $this->render('main/admin.html.twig', [
-            'users' => $users,
-            'reportedPosts' => $reportedPosts
+            'users' => $userRepository->findAll(),
+            'reportedPosts' => $postRepository->findBy(['report' => true]),
+            'comments' => $commentRepository->findAll()
         ]);
     }
 }
