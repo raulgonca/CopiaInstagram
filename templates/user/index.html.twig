@@ -1,39 +1,39 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}User index{% endblock %}
+{% block title %}
+{% if user is defined %}
+    {{user.username}}
+    {% else %}
+    No existe el usuario
+{% endif %}
+{% endblock %}
 
 {% block body %}
-    <h1>User index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Username</th>
-                <th>Roles</th>
-                <th>Password</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
+
         {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-                <td>{{ user.password }}</td>
-                <td>
-                    <a href="{{ path('app_user_show', {'id': user.id}) }}">show</a>
+            
+                <h2>{{ user.username }}</h2>
+        {% if user==app.user %}
+                <div>
                     <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
-                </td>
-            </tr>
+                </div>
+            {% endif %}
         {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
+            <div>
+                <p>No existe el usuario</p>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
+
+        {% if post is definded %}
+            {% for post in posts %}
+                <h2>{{ post.title }}</h2>
+                <p>{{ post.body }}</p>
+            {% endfor %}
+        {% else %}
+            <div>
+                <p>No existen posts</p>
+            </div>
+        {% endif %}
 
     <a href="{{ path('app_user_new') }}">Create new</a>
 {% endblock %}
