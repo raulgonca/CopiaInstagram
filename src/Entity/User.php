@@ -37,12 +37,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-
-
-
-    #[ORM\Column(type: Types::ARRAY, nullable: true)]
-    private ?array $follows = null;
-
+    #[ORM\Column(type: Types::ARRAY)]
+    private array $follows = [];
 
     /**
      * @var Collection<int, Post>

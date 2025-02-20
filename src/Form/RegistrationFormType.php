@@ -43,6 +43,19 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
+            -> add('makeAdmin', CheckboxType::class, [
+                'label' => '¿Quieres participar como admin?',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('agreeTerms', CheckboxType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'Debes aceptar los Términos para registrarte.',
+                    ]),
+                ],
+            ])
         ;
     }
 
