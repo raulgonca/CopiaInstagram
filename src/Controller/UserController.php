@@ -15,10 +15,10 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UserController extends AbstractController
 {
     #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    public function index(int $id, UserRepository $userRepository): Response
     {
         return $this->render('user/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'user' => $userRepository->findById($id),
         ]);
     }
 
@@ -67,7 +67,7 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
-        return $this->render('user/show.html.twig', [
+        return $this->render('user/index.html.twig', [
             'user' => $user,
         ]);
     }
@@ -100,4 +100,36 @@ final class UserController extends AbstractController
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/{id}/unfollow', name: 'app_user_unfollow', methods: ['GET'])]
+    public function unfollowUser(int $id, UserRepository $userRepository, EntityManager $entityManager): Response
+    {
+        $user = $userRepository->findById($this->getUser());
+        if ($user->getFollows()->contains($id)) {
+            $user->getFollows()->removeElement($id);
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+
+        return $this->render('user/index.html.twig', [
+            'user' => $userRepository->findById($id),
+        ]);
+    }
+
+    #[Route('/{id}/follow', name: 'app_user_follow', methods: ['GET'])]
+    public function followUser(int $id, UserRepository $userRepository, EntityManager $entityManager): Response
+    {
+        $user = $userRepository->findById($this->getUser());
+        if ($user->getFollows()->contains($id)===false) {
+            $user->getFollows()->addElement($id);
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+        return $this->render('user/index.html.twig', [
+            'user' => $userRepository->findById($id),
+        ]);
+    }
+
 }
