@@ -40,7 +40,7 @@ final class CommentController extends AbstractController
         }
 
         try {
-            $comment = new Comment();
+        $comment = new Comment();
             $comment->setOwner($user);
             $comment->setText($content);
             $comment->setDate(new \DateTime());
@@ -48,7 +48,7 @@ final class CommentController extends AbstractController
 
             $entityManager->persist($comment);
             $entityManager->flush();
-            
+
             $this->addFlash('success', 'Comment added successfully');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Error saving comment');

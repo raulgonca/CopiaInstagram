@@ -33,9 +33,7 @@ class PostType extends AbstractType
                         'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG, GIF, WEBP)',
                     ])
                 ],
-            ])
-        
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

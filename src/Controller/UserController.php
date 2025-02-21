@@ -102,11 +102,23 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}/unfollow', name: 'app_user_unfollow', methods: ['GET'])]
-    public function unfollowUser(int $id, UserRepository $userRepository, EntityManager $entityManager): Response
+    public function unfollowUser(int $id, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
-        $user = $userRepository->findById($this->getUser());
-        if ($user->getFollows()->contains($id)) {
-            $user->getFollows()->removeElement($id);
+        $user = $userRepository->findById($this->getUser()->getId());
+        
+        $isFollowed = false;
+
+        foreach ($user->getFollows() as $follow) {
+            if ($follow === $id) {
+                $isFollowed = true;
+            }
+        }
+
+        if ($isFollowed == true) {
+            $array = $user->getFollows();
+            $key = array_search($id, $array);
+            unset($array[$key]);
+            $user->setFollows($array);
             $entityManager->persist($user);
             $entityManager->flush();
         }
@@ -118,11 +130,22 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}/follow', name: 'app_user_follow', methods: ['GET'])]
-    public function followUser(int $id, UserRepository $userRepository, EntityManager $entityManager): Response
+    public function followUser(int $id, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {
-        $user = $userRepository->findById($this->getUser());
-        if ($user->getFollows()->contains($id)===false) {
-            $user->getFollows()->addElement($id);
+        $user = $userRepository->findById($this->getUser()->getId());
+        $isFollowed = false;
+
+        
+        foreach ($user->getFollows() as $follow) {
+            if ($follow === $id) {
+                $isFollowed = true;
+            }
+        }
+
+        if ($isFollowed==false) {
+            $array = $user->getFollows();
+            array_push($array, $id);
+            $user->setFollows($array);
             $entityManager->persist($user);
             $entityManager->flush();
         }

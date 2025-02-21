@@ -118,6 +118,7 @@ final class PostController extends AbstractController
             'hasLiked' => $userLike !== null
         ]);
     }
+
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
